@@ -1,0 +1,41 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+ul {
+    list-style: none;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header{
+    height: 100px;
+    background: #dddddd;
+}
+
+footer ul{
+    height: 100px;
+    background: #dddddd;
+}
+
+main {
+    flex-grow: 1  ;
+    overflow: auto;
+}
+
+footer > ul {
+    display: flex;
+}
+
+footer > ul > li {
+    background: red;
+    width: 25%;
+    height: 100%;
+    border: 1px solid black;
+}
