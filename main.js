@@ -1,20 +1,10 @@
 // reduce实现map
 
-Array.prototype.myReduce = function (fn, initialValue=this[0]) {
-    let res = initialValue
-    let arr = this
-    let preValue = initialValue
-    for (let i = 0; i < arr.length; i++) {
-        const item = arr[i]
-        preValue = fn(preValue, item, i, arr)
-    }
-    return preValue
+function foo() {
+    this.a = "a"
+    console.log(this === global)
 }
 
-let a = [1, 2, 3, 5]
+foo()
 
-const b = a.reduce((pre, cur) => {
-    return pre + cur
-})
-
-console.log(b)
+let f = new foo()

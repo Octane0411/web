@@ -6,40 +6,7 @@
 </head>
 <body>
 <script>
-    Function.prototype.myCall = function (thisArg = window, ...args) {
-        if (thisArg === null) {
-            thisArg = window
-        }
-        thisArg.fn = this
-        const res = thisArg.fn(...args)
-        delete thisArg.fn
-        return res
-    }
 
-    Function.prototype.call2 = function(context = window, ...args) {
-        if (typeof this !== 'function') {
-            throw new TypeError('Type Error');
-        }
-        const fn = Symbol('fn');
-        context[fn] = this;
-
-        const res = context[fn](...args);
-        delete context[fn];
-        return res;
-    }
-
-
-    const echo = function (str) {
-        console.log(this)
-        console.log(str)
-    }
-
-    let obj = {
-        name: "dog"
-    }
-
-    echo.myCall(null, 'hello')
-    echo.call2(obj, 'hello')
 </script>
 </body>
 </html>
