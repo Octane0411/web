@@ -4,7 +4,7 @@
 
 #### HTML语义化标签
 
-1. 是什么：语义化标签是一种写 HTML 标签的**方法论**/方式。 
+1. 是什么：语义化标签是一种写 HTML 标签的**方法论**/方式。
 
 2. 怎么做：实现方法是遇到标题就用 h1 到 h6，遇到段落用 p，遇到文章用 article，主要内容用 main，边栏用 aside，导航用 nav……（就是找到中文对应的英文）
 
@@ -94,9 +94,9 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 
 ```css
 .clearfix:after{
-  content:'';
-  display:block;
-  clear: both;
+    content:'';
+    display:block;
+    clear: both;
 }
 ```
 
@@ -130,7 +130,7 @@ string, number, boolean ...
 
 >  为什么需要bigint：js的number是64位的双精度浮点数，精度有限，bigint是无限的
 >
-> bigint用法（数字后面加个n）
+>  bigint用法（数字后面加个n）
 
 数组，函数，日期，这些是class，不是类型type
 
@@ -175,9 +175,9 @@ x.__?????__ === Object.prototype
 
 这样一来，a 就有两层原型：
 
-1. a 的原型是 Array.prototype 
+1. a 的原型是 Array.prototype
 
-1. a 的原型的原型是 Object.prototype 
+1. a 的原型的原型是 Object.prototype
 
 于是就通过隐藏属性 `__?????__` 形成了一个链条：
 
@@ -505,3 +505,192 @@ class Dog extends Animal{
   }
 }
 ```
+
+## TS
+
+#### TS 和 JS 的区别是什么？有什么优势？
+
+1. 语法层面：TypeScript = JavaScript + Type（TS 是 JS 的超集）
+
+2. 执行环境层面：浏览器、Node.js 可以直接执行 JS，但不能执行 TS（Deno 可以执行 TS）
+
+3. 编译层面：TS 有编译阶段，JS 没有编译阶段（只有转译阶段和 lint 阶段）
+
+4. 编写层面：TS 更难写一点，但是**类型更安全**
+
+5. 文档层面：TS 的代码写出来就是文档，IDE 可以完美**提示**。JS 的提示主要靠 TS
+
+其他……自己搜一下博客
+
+#### any、unknown、never 的区别是什么？
+
+##### any V.S. unknown
+
+二者都是顶级类型（top type），任何类型的值都可以赋值给顶级类型变量：
+
+```js
+let foo: any = 123; // 不报错
+let bar: unknown = 123; // 不报错
+```
+
+但是 unknown 比 any 的类型检查更严格，any 什么检查都不做，unknown 要求先收窄类型：
+
+```js
+const value: unknown = "Hello World";
+const someString: string = value; 
+// 报错：Type 'unknown' is not assignable to type 'string'.(2322)
+const value: any = "Hello World";
+const someString: string = value; 
+// 那么unknown该怎么用呢
+const value: unknown = "Hello World";
+const someString: string = value as string; // 不报错
+```
+
+如果改成 any，基本在哪都不报错。所以能用 unknown 就优先用 unknown，类型更安全一点。
+
+##### never
+
+never 是底类型，表示不应该出现的类型，这里有一个[尤雨溪给出的例子](https://www.zhihu.com/question/354601204/answer/888551021)：
+
+```js
+interface A {
+  type: 'a'
+}
+
+interface B {
+  type: 'b'
+}
+
+type All = A | B
+
+function handleValue(val: All) {
+  switch (val.type) {
+    case 'a':
+      // 这里 val 被收窄为 A
+      break
+    case 'b':
+      // val 在这里是 B
+      break
+    default:
+      // val 在这里是 never
+      const exhaustiveCheck: never = val
+      break
+  }
+}
+```
+
+现在你应该理解什么是「不应该出现的类型」了吧。
+
+#### type和interface的区别
+
+官方给出的[文档说明](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces)：
+
+1. 组合方式：interface 使用 extends 来实现继承，type 使用 & 来实现联合类型。
+
+2. 扩展方式：interface 可以重复声明用来扩展，type 一个类型只能声明一次
+
+3. 范围不同：type 适用于基本类型，interface 一般不行。
+
+4. 命名方式：interface 会创建新的类型名，type 只是创建类型别名，并没有新创建类型。
+
+#### TS 工具类型 Partial、Required、Readonly、Exclude、Extract、Omit、ReturnType 的作用和实现？
+
+1. 将英文翻译为中文。
+
+   a. Partial 部分类型
+
+   b. Required 必填类型
+
+   c. Readonly 只读类型
+
+   d. Exclude 排除类型
+
+   e. Extract 提取类型
+
+   f. Pick/Omit 排除 key 类型
+
+   g. ReturnType 返回值类型
+
+2. 举例说明每个工具类型的用法。
+
+## 工程化
+
+#### 常见 loader 和 plugin 有哪些？二者的区别是什么？
+
+##### 常见 loader
+
+在 webpack 文档里写了：
+
+(https://webpack.js.org/loaders/)
+
+你可以记住：
+
+1. `babel-loader` 把 JS/TS 变成  JS
+
+1. `ts-loader` 把 TS 变成 JS，**并提示类型错误**
+
+1. `markdown-loader` 把 markdown 变成 html
+
+1. `html-loader` 把 html 变成 JS 字符串
+
+1. `sass-loader` 把 SASS/SCSS 变成 CSS
+
+1. `css-loader` 把 CSS 变成 JS 字符串
+
+1. `style-loader` 把 JS 字符串变成 style 标签
+
+1. `postcss-loader` 把 CSS 变成更优化的 CSS
+
+1. `vue-loader` 把单文件组件（SFC）变成 JS 模块
+
+1. `thread-loader` 用于多进程打包
+
+##### 常见 plugin
+
+也在 webpack 文档里写了：
+
+[Plugins | webpackwebpack is a module bundler. Its main purpose is to bundle JavaScript files for usage in a browser, yet it is also capable of transforming, bundling, or packaging just about any resource or asset.](https://webpack.js.org/plugins/)
+
+你可以记住这些：
+
+1. `html-webpack-plugin` 用于创建 HTML 页面并自动引入 JS 和 CSS
+
+1. `clean-webpack-plugin` 用于清理之前打包的残余文件
+
+1. `mini-css-extract-plugin` 用于将 JS 中的 CSS 抽离成单独的 CSS 文件
+
+1. `SplitChunksPlugin` 用于代码分包（Code Split）
+
+1. ```
+   DllPlugin
+   ```
+
+   \+
+
+   ```
+   DllReferencePlugin
+   ```
+
+   用于避免大依赖被频繁重新打包，大幅降低打包时间
+
+   [webpack使用-详解DllPlugin（时光飞逝，转眼又偷懒了一个多月） DLL(Dynamic Link Library)文件为动态链接库文件,在Windows中，许多应用程序并不是一个完整的可执行文件，它们被分割成一些相对独立的动态链接库，即DLL文件，放置于系统中。当我们执行某一个程序时，相应的DLL文件就会被调用。 举个例子：很多产品都用到螺丝，但是工厂在生产不同产品时，不需要每次连带着把螺丝也生产出来，因为螺丝可以单独生产，并给多种产品使用。在这里螺丝的作用就可以理解为是dll。 通常来说，我们的代码都可以至少简单区分成 业务代码和 第三方库。如果不做处理，每次构建时都需要把所有的代码重新构建一次，耗费大量的时间。然后大部分情况下，很多第三方库的代码并不会发生变更（除非是版本升级），这时就可以用到dll： 把复用性较高的第三方模块打包到动态链接库中，在不升级这些库的情况下，动态库不需要重新打包，每次构建只重新打包业务代码 。 还是上面的例子：把每次构建，当做是生产产品的过程，我们把生产螺丝的过程先提取出来，之后我们不管调整产品的功能或者设计（对应于业务代码变更）， 都不必重复生产螺丝（第三方模块不需要重复打包）；除非是 产品要使用新型号的螺丝（第三方模块需要升级） ，才需要去重新生产新的螺丝，然后接下来又可以专注于调整产品本身。 使用dll时，可以把构建过程分成dll构建过程和主构建过程（实质也就是如此），所以需要两个构建配置文件，例如叫做 webpack.config.js和 webpack.dll.config.js 。 DllPlugin是 webpack内置的插件，不需要额外安装，直接配置 webpack.dll.config.js 文件： module.exports = {= entry: { // 第三方库 react: ['react', 'react-dom', 'react-redux'\] }, output: { // 输出的动态链接库的文件名称，[name] 代表当前动态链接库的名称， filename: '[name].dll.js', path: resolve('dist/dll'), // library必须和后面dllplugin中的name一致 后面会说明 library: '[name]_dll_[hash]' }, plugins:](https://segmentfault.com/a/1190000016567986)
+
+1. `eslint-webpack-plugin` 用于检查代码中的错误
+
+1. `DefinePlugin` 用于在 webpack config 里添加全局变量
+
+1. `copy-webpack-plugin` 用于拷贝静态文件到 dist
+
+##### 二者的区别
+
+- loader 是文件加载器（这句废话很重要）
+
+    - 功能：能够对文件进行编译、优化、混淆（压缩）等，比如 babel-loader / vue-loader
+
+    - 运行时机：在创建最终产物之前运行
+
+- plugin 是 webpack 插件（这句废话也很重要）
+
+    - 功能：能实现更多功能，比如定义全局变量、Code Split、加速编译等
+
+    - 运行时机：在整个打包过程（以及前后）都能运行
