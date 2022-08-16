@@ -929,7 +929,7 @@ function handleValue(val: All) {
 
 也在 webpack 文档里写了：
 
-[Plugins | webpackwebpack is a module bundler. Its main purpose is to bundle JavaScript files for usage in a browser, yet it is also capable of transforming, bundling, or packaging just about any resource or asset.](https://webpack.js.org/plugins/)
+(https://webpack.js.org/plugins/)
 
 你可以记住这些：
 
@@ -941,19 +941,9 @@ function handleValue(val: All) {
 
 1. `SplitChunksPlugin` 用于代码分包（Code Split）
 
-1. ```
-   DllPlugin
-   ```
+1. `DllPlugin`+`DllReferencePlugin`用于避免大依赖被频繁重新打包，大幅降低打包时间
 
-   \+
-
-   ```
-   DllReferencePlugin
-   ```
-
-   用于避免大依赖被频繁重新打包，大幅降低打包时间
-
-   [webpack使用-详解DllPlugin（时光飞逝，转眼又偷懒了一个多月） DLL(Dynamic Link Library)文件为动态链接库文件,在Windows中，许多应用程序并不是一个完整的可执行文件，它们被分割成一些相对独立的动态链接库，即DLL文件，放置于系统中。当我们执行某一个程序时，相应的DLL文件就会被调用。 举个例子：很多产品都用到螺丝，但是工厂在生产不同产品时，不需要每次连带着把螺丝也生产出来，因为螺丝可以单独生产，并给多种产品使用。在这里螺丝的作用就可以理解为是dll。 通常来说，我们的代码都可以至少简单区分成 业务代码和 第三方库。如果不做处理，每次构建时都需要把所有的代码重新构建一次，耗费大量的时间。然后大部分情况下，很多第三方库的代码并不会发生变更（除非是版本升级），这时就可以用到dll： 把复用性较高的第三方模块打包到动态链接库中，在不升级这些库的情况下，动态库不需要重新打包，每次构建只重新打包业务代码 。 还是上面的例子：把每次构建，当做是生产产品的过程，我们把生产螺丝的过程先提取出来，之后我们不管调整产品的功能或者设计（对应于业务代码变更）， 都不必重复生产螺丝（第三方模块不需要重复打包）；除非是 产品要使用新型号的螺丝（第三方模块需要升级） ，才需要去重新生产新的螺丝，然后接下来又可以专注于调整产品本身。 使用dll时，可以把构建过程分成dll构建过程和主构建过程（实质也就是如此），所以需要两个构建配置文件，例如叫做 webpack.config.js和 webpack.dll.config.js 。 DllPlugin是 webpack内置的插件，不需要额外安装，直接配置 webpack.dll.config.js 文件： module.exports = {= entry: { // 第三方库 react: ['react', 'react-dom', 'react-redux'\] }, output: { // 输出的动态链接库的文件名称，[name] 代表当前动态链接库的名称， filename: '[name].dll.js', path: resolve('dist/dll'), // library必须和后面dllplugin中的name一致 后面会说明 library: '[name]_dll_[hash]' }, plugins:](https://segmentfault.com/a/1190000016567986)
+plugin博客 (https://segmentfault.com/a/1190000016567986)
 
 1. `eslint-webpack-plugin` 用于检查代码中的错误
 
@@ -975,3 +965,346 @@ function handleValue(val: All) {
 
     - 运行时机：在整个打包过程（以及前后）都能运行
 
+#### webpack 如何解决开发时的跨域问题？
+
+可以在 webpack.config.js 中添加如下配置：
+
+```js
+module.exports = {
+  //...
+  devServer: {
+    proxy: {
+      '/api': {
+        target: 'http://xiedaimala.com',
+        changeOrigin: true,
+      },
+    },
+  },
+};
+```
+
+此时，在 JS 中请求 `/api/users` 就会自动被代理到 `http://xiedaimala.com/api/users` 。
+
+如果希望请求中的 Origin 从 8080 修改为 xiedaimala.com，可以添加 `changeOrigin: true` 。
+
+如果要访问的是 HTTPS API，那么就需要配置 HTTPS 证书，否则会报错。
+
+不过，如果在 target 下面添加 `secure: false` ，就可以不配置证书且忽略 HTTPS 报错。
+
+总之，记住常用选项就行了。
+
+#### 如何实现 tree-shaking？
+
+这题属于拿着文档问面试者，欺负那些背不下文档的人。
+
+(https://webpack.js.org/guides/tree-shaking/#conclusion)
+
+(https://webpack.docschina.org/guides/tree-shaking/#conclusion)
+
+##### 是什么
+
+tree-shaking 就是让没有用到的 JS 代码不打包，以减小包的体积。
+
+##### 怎么做
+
+背下文档说的这几点：
+
+1. 怎么删
+
+   a. 使用 ES Modules 语法（即 ES6 的 import 和 export 关键字）
+
+   b. CommonJS 语法无法 tree-shaking（即 require 和 exports 语法）
+
+   c. 引入的时候只引用需要的模块
+
+   ​	i. 要写 `import {cloneDeep} from 'lodash-es'` 因为方便 tree-shaking
+
+   ​	ii. 不要写 `import _ from 'lodash'` 因为会导致无法 tree-shaking 无用模块
+
+2. 怎么不删：在 package.json 中配置 sideEffects，防止某些文件被删掉
+
+​	   a. 比如我 import 了 x.js，而 x.js 只是添加了 window.x 属性，那么 x.js 就要放到 sideEffects 里
+
+​		b. 比如所有被 import 的 CSS 都要放在 sideEffects 里
+
+3. 怎么开启：在 webpack config 中将 mode 设置为 production（开发环境没必要 tree-shaking）
+
+​		a.`mode: production` 给 webpack 加了非常多[优化](https://github.com/webpack/webpack/blob/f43047c4c2aa4b0a315328e4c34a319dc2662254/lib/config/defaults.js#L1125)。
+
+#### 如何提高 webpack 构建速度？
+
+webpack 文档写着呢：
+
+(https://webpack.docschina.org/guides/build-performance/)
+
+1. 使用 DllPlugin 将不常变化的代码提前打包，并复用，如 vue、react
+
+2. 使用 thread-loader 或 HappyPack（过时）进行多线程打包
+
+3. 处于开发环境时，在 webpack config 中将 cache 设为 true，也可用 cache-loader（过时）
+
+4. 处于生产环境时，关闭不必要的环节，比如可以关闭 source map
+
+5. 网传的 HardSourceWebpackPlugin 已经一年多没更新了，谨慎使用
+
+#### webpack 与 vite 的区别是什么？
+
+1. 开发环境区别（vite不打包，webpack打包）
+
+   1. vite 自己实现 server，不对代码打包，充分利用浏览器对 `<script type=module>`的支持
+
+      1. 假设 main.js 引入了 vue
+
+      2. 该 server 会把 `import { createApp } from 'vue'` 改为 `import { createApp } from "/node_modules/.vite/vue.js"` 这样浏览器就知道去哪里找 vue.js 了
+
+   2. webpack-dev-server 常使用 babel-loader 基于内存打包，比 vite 慢很多很多很多
+      1. 该 server 会把 vue.js 的代码（递归地）打包进 main.js
+   
+2. 生产环境区别
+
+   1. vite 使用 rollup + esbuild 来打包 JS 代码
+
+   2. webpack使用 babel 来打包 JS 代码，比 esbuild 慢很多很多很多
+
+​				-- webpack 能使用 esbuild 吗？可以，你要自己配置（很麻烦）
+
+3. 文件处理时机
+
+   1. vite 只会在你请求某个文件的时候处理该文件
+
+   2. webpack 会提前打包好 main.js，等你请求的时候直接输出打包好的 JS 给你
+
+目前已知 vite 的缺点有：
+
+1. 热更新常常失败，原因不清楚
+
+2. 有些功能 rollup 不支持，需要自己写 rollup 插件
+
+3. 不支持非现代浏览器
+
+#### webpack 怎么配置多页应用？
+
+这是对应的 webpack config：
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+  entry: {
+    app: './src/app.js',
+    admin: './src/admin.js',
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      chunks: ['app']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'admin.html',
+      chunks: ['admin']
+    })
+  ],
+};
+```
+
+但是，这样配置会有一个「**重复打包**」的问题：假设 app.js 和 admin.js 都引入了 vue.js，那么 vue.js 的代码既会打包进 app.js，也会打包进 admin.js。我们需要使用 `optimization.splitChunks` 将共同依赖单独打包成 common.js（HtmlWebpackPlugin 会自动引入 common.js）。
+
+##### 如何支持无限多页面呢？
+
+写点 Node.js 代码不就实现了么？
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const fs = require('fs')
+const path = require('path')
+
+const filenames = fs.readdirSync('./src/pages')
+  .filter(file => file.endsWith('.js'))
+  .map(file => path.basename(file, '.js'))
+
+const entries = filenames.reduce((result, name) => (
+  { ...result, [name]: `./src/pages/${name}.js` }
+), {})
+const plugins = filenames.map((name) =>
+  new HtmlWebpackPlugin({
+    filename: name + '.html',
+    chunks: [name]
+  })
+)
+
+module.exports = {
+  entry: {
+    ...entries
+  },
+  plugins: [
+    ...plugins
+  ],
+};
+```
+
+#### swc、esbuild 是什么？
+
+##### swc
+
+实现语言：Rust
+
+功能：编译 JS/TS、打包 JS/TS
+
+优势：比 babel 快很多很多很多（20倍以上）
+
+能否集成进 webpack：能
+
+使用者：Next.js、Parcel、Deno、Vercel
+
+做不到：
+
+1. 对 TS 代码进行类型检查（用 tsc 可以）
+
+2. 打包 CSS、SVG
+
+##### esbuild
+
+实现语言：Go
+
+功能：同上
+
+优势：比 babel 快很多很多很多很多很多很多（10~100倍）
+
+能否集成进 webpack：能
+
+使用者：vite、vuepress、snowpack、umijs、blitz.js 等
+
+做不到：
+
+1. 对 TS 代码进行类型检查
+
+2. 打包 CSS、SVG
+
+## 浏览器
+
+#### Event Loop
+
+### **背景知识**
+
+(https://juejin.cn/post/6844903582538399752)
+
+Node.js 将各种函数（也叫任务或回调）分成至少 6 类，按先后顺序调用，因此将时间分为六个阶段：
+
+1. timers 阶段（setTimeout）
+
+1. I/O callbacks 该阶段不用管
+
+1. idle, prepare 该阶段不用管
+
+1. poll 轮询阶段，停留时间最长，可以随时离开。
+
+   1. 主要用来处理 I/O 事件，该阶段中 Node 会不停询问操作系统有没有文件数据、网络数据等
+
+   1. 如果 Node 发现有 timer 快到时间了或者有 setImmediate 任务，就会主动离开 poll 阶段
+
+1. check 阶段，主要处理 setImmediate 任务
+
+1. close callback 该阶段不用管
+
+Node.js 会不停的从 1 ~ 6 循环处理各种事件，这个过程叫做事件循环（Event Loop）。
+
+##### **nextTick**
+
+process.nextTick(fn) 的 fn 会在什么时候执行呢？
+
+在 Node.js 11 之前，会在每个阶段的末尾集中执行（俗称队尾执行）。
+
+在 Node.js 11 之后，会在每个阶段的任务间隙执行（俗称插队执行）。
+
+浏览器跟 Node.js 11 之后的情况类似。可以用 window.queueMicrotask 模拟 nextTick。
+
+##### Promise
+
+Promise.resolve(1).then(fn) 的 fn 会在什么时候执行？
+
+这要看 Promise 源码是如何实现的，一般都是用 process.nextTick(fn) 实现的，所以直接参考 nextTick。
+
+##### async / await 
+
+这是 Promise 的语法糖，所以直接转为 Promise 写法即可。
+
+面试题1：
+
+```js
+setTimeout(() => {
+  console.log('setTimeout')
+})
+
+setImmediate(() => {
+  console.log('setImmediate')
+})
+// 在 Node.js 运行会输出什么？
+// A setT setIm
+// B setIm setT
+// C 出错
+// D A 或 B
+// 在浏览器执行会怎样？
+```
+
+面试题2：
+
+```js
+async function async1(){
+    console.log('1')                   // 2
+    async2().then(()=>{
+      console.log('2')
+    })
+    
+}
+async function async2(){
+    console.log('3')                   // 3
+}
+console.log('4')                        // 1
+setTimeout(function(){
+    console.log('5') 
+},0)  
+async1();
+new Promise(function(resolve){
+    console.log('6')                    // 4
+    resolve();
+}).then(function(){
+    console.log('7')
+})
+console.log('8')                           // 5  
+//4 1 3 6 8 2 7 5 
+```
+
+#### 宏任务微任务
+
+浏览器中并不存在宏任务，宏任务（Macrotask）是 Node.js 发明的术语。
+
+浏览器中只有任务（Task）和微任务（Microtask）。
+
+1. 使用 script 标签、setTimeout 可以创建任务。
+
+1. 使用 Promise#then、window.queueMicrotask、MutationObserver、Proxy 可以创建微任务。
+
+执行顺序是怎样的呢？
+
+微任务会在任务间隙执行（俗称插队执行）。
+
+注意，微任务不能插微任务的队，微任务只能插任务的队。
+
+面试题：(https://www.zhihu.com/question/495934384)
+
+```js
+// next = [0, 4x, 1, 2, 3, 5, 6]
+Promise.resolve()
+	.then(() => {
+	    console.log(0);
+	    return Promise.resolve('4x');
+	})
+	
+	.then((res) => {console.log(res)})
+	
+Promise.resolve().then(() => {console.log(1);})
+                 .then(() => {console.log(2);}, ()=>{console.log(2.1)})
+                 .then(() => {console.log(3);})
+                 .then(() => {console.log(5);})
+                 .then(() => {console.log(6);})
+```
