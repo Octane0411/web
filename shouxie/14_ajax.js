@@ -10,7 +10,7 @@ xhr.onreadystatechange = () => {
         }
     }
 }
-xhr.onload = () => {
+xhr.onload = () =>{
     console.log('得到内容')
 }
 xhr.onerror = () => {

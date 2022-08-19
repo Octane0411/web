@@ -23,7 +23,7 @@ let target = {
 }
 
 // 深拷贝 JSON
-// 使用JSON.stringify不能将方法和undefined转化为字符串，会丢失
+// 使用JSON.stringify不能将方法和undefined转化为字符串，会丢失，
 let newObj = JSON.parse(JSON.stringify(target))
 // 为了解决上面的问题
 // 但是for...in拿不到symbol属性
@@ -45,3 +45,62 @@ const deepCopy = (obj) => {
     }
     return res
 }
+
+
+const deepClone = (a, cache) => {
+    if (!cache) {
+        cache = new Map() // cache最好别全局，放在参数里传递
+    }
+    if(a instanceof Object) {
+        if (cache.has(a)) {
+            return cache.get(a)
+        }
+        let res = undefined
+        if (a instanceof Function) { // 不能百分百拷贝
+            //箭头函数没有prototype
+            if(a.prototype) {// a是普通函数
+                res = function () {return a.apply(this, arguments)}
+            } else {// a是箭头函数
+                res = () => {return a.apply(undefined, arguments)}
+            }
+        } else if (a instanceof Array) {
+            res = []
+        } else if (a instanceof Date) {
+            res = new Date(a - 0)// 时间戳
+        } else if (a instanceof RegExp) {
+            res = new RegExp(a.source, a.flags)
+        } else {
+            res = {}
+        }
+        cache.set(a, res)
+        for (let key in a) {
+            if (a.hasOwnProperty(key)) {
+                res[key] = deepClone(a[key], cache)
+            }
+        }
+        return res
+    } else {
+        // string number bool null undefined symbol bigint
+        return a
+    }
+}
+
+const a = {
+    number:1, bool:false, str: 'hi', empty1: undefined, empty2: null,
+    array: [
+        {name: 'frank', age: 18},
+        {name: 'jacky', age: 19}
+    ],
+    date: new Date(2000,0,1,20,30,0),
+    regex: /\.(j|t)sx/i,
+    obj: { name:'frank', age: 18},
+    f1: (a, b) => a + b,
+    f2: function(a, b) { return a + b }
+}
+a.self = a
+
+const b = deepClone(a)
+
+b.self === b // true
+b.self = 'hi'
+a.self !== 'hi' //true
