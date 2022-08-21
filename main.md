@@ -506,6 +506,90 @@ class Dog extends Animal{
 }
 ```
 
+#### 深拷贝
+
+##### 方法一，用 JSON：
+
+```js
+const b = JSON.parse(JSON.stringify(a))
+```
+
+答题要点是指出这个方法有如下缺点：
+
+1. 不支持 Date、正则、undefined、函数等数据
+
+2. 不支持引用（即环状结构）
+
+3. 必须说自己还会方法二
+
+##### 方法二，用递归：
+
+要点：
+
+1. 递归
+
+2. 判断类型
+
+3. 检查环
+
+4. 不拷贝原型上的属性
+
+```js
+const deepClone = (a, cache) => {
+  if(!cache){
+    cache = new Map() // 缓存不能全局，最好临时创建并递归传递
+  }
+  if(a instanceof Object) { // 不考虑跨 iframe
+    if(cache.get(a)) { return cache.get(a) }
+    let result 
+    if(a instanceof Function) {
+      if(a.prototype) { // 有 prototype 就是普通函数
+        result = function(){ return a.apply(this, arguments) }
+      } else {
+        result = (...args) => { return a.call(undefined, ...args) }
+      }
+    } else if(a instanceof Array) {
+      result = []
+    } else if(a instanceof Date) {
+      result = new Date(a - 0)
+    } else if(a instanceof RegExp) {
+      result = new RegExp(a.source, a.flags)
+    } else {
+      result = {}
+    }
+    cache.set(a, result)
+    for(let key in a) { 
+      if(a.hasOwnProperty(key)){
+        result[key] = deepClone(a[key], cache) 
+      }
+    }
+    return result
+  } else {
+    return a
+  }
+}
+
+const a = { 
+  number:1, bool:false, str: 'hi', empty1: undefined, empty2: null, 
+  array: [
+    {name: 'frank', age: 18},
+    {name: 'jacky', age: 19}
+  ],
+  date: new Date(2000,0,1,20,30,0),
+  regex: /\.(j|t)sx/i,
+  obj: { name:'frank', age: 18},
+  f1: (a, b) => a + b,
+  f2: function(a, b) { return a + b }
+}
+a.self = a
+
+const b = deepClone(a)
+
+b.self === b // true
+b.self = 'hi'
+a.self !== 'hi' //true
+```
+
 ## DOM
 
 #### 简述DOM事件模型
@@ -898,6 +982,12 @@ function handleValue(val: All) {
 2. 举例说明每个工具类型的用法。
 
 ## 工程化
+
+#### webpack打包过程
+
+1. 初始化
+2. 编译
+3. 
 
 #### 常见 loader 和 plugin 有哪些？二者的区别是什么？
 
@@ -1494,6 +1584,18 @@ Promise.resolve().then(() => {console.log(1);})
          ```
 
          React 先对比 key 发现 key 只新增了一个，于是保留 b 和 c，新建 a。
+   
+   1. 根据 React 文档中给出的场景反复在大脑中运行代码
+   
+      1. 场景0：单个节点，会运行到 reconcileSingleElement。接下来看多个节点的情况。
+   
+      1. 场景1：没 key，标签名变了，最终会走到 createFiberFromElement（存疑）
+   
+      1. 场景2：没 key，标签名没变，但是属性变了，最终走到 updateElement 里的 useFiber
+   
+      1. 场景3：有 key，key 的顺序没变，最终走到 updateElement
+   
+      1. 场景4：有 key，key 的顺序变了，updateSlot 返回 null，最终走到 mapRemainingChildren、updateFromMap 和 updateElement(matchedFiber)，整个过程较长，效率较低
 
 #### React 有哪些生命周期钩子函数？数据请求放在哪个钩子里？
 
