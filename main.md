@@ -39,6 +39,23 @@
 
 6. 不同点：SVG 支持分层和事件，Canvas 不支持，但是可以用库实现。
 
+#### async和defer
+
+##### defer
+
+这个属性的用途是表明脚本在执行时不会影响页面的构造。也就是说，脚本会被延迟到整个页面都解析完毕后再运行。因此，在`<script>`元素中设置`defer`属性，相当于告诉浏览器立即下载，但延迟执行。
+HTML5规范要求脚本按照它们出现的先后顺序执行，因此第一个延迟脚本会先于第二个延迟脚本执行，而这两个脚本会先于`DOMContentLoaded`事件执行。**在现实当中**，延迟脚本并不一定会按照顺序执行，也不一定会在`DOMContentLoad`时间触发前执行，因此最好只包含一个延迟脚本。
+
+##### async
+
+这个属性与`defer`类似，都用于改变处理脚本的行为。同样与`defer`类似，`async`只适用于外部脚本文件，并告诉浏览器立即下载文件。但与`defer`不同的是，标记为`async`的脚本并不保证按照它们的先后顺序执行。
+
+第二个脚本文件可能会在第一个脚本文件之前执行。因此确保两者之间互不依赖非常重要。指定`async`属性的目的是不让页面等待两个脚本下载和执行，从而异步加载页面其他内容。
+
+在实际开发中， **defer 用于需要整个DOM 的脚本，和/或脚本的相对执行顺序很重要的时候。** **async 用于独立脚本，例如计数器或广告，这些脚本的相对执行顺序无关紧要**。
+
+![](https://image-static.segmentfault.com/144/351/1443517782-57c6928b20b56_fix732)
+
 ## CSS
 
 #### BFC是什么
@@ -117,8 +134,6 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 border-box更好，符合直觉
 
 ## JS
-
-### 基础
 
 #### JS的数据类型有哪些
 
@@ -590,6 +605,17 @@ b.self = 'hi'
 a.self !== 'hi' //true
 ```
 
+#### xhr
+
+| 值   | 状态               | 描述                                                |
+| :--- | :----------------- | :-------------------------------------------------- |
+| `0`  | `UNSENT`           | 代理被创建，但尚未调用 open() 方法。                |
+| `1`  | `OPENED`           | `open()` 方法已经被调用。                           |
+| `2`  | `HEADERS_RECEIVED` | `send()` 方法已经被调用，并且头部和状态已经可获得。 |
+| `3`  | `LOADING`          | 下载中；`responseText` 属性已经包含部分数据。       |
+| `4`  | `DONE`             | 下载操作已完成。                                    |
+
+
 ## DOM
 
 #### 简述DOM事件模型
@@ -649,7 +675,6 @@ function delegate(element, eventType, selector, fn) {
 	  el && fn.call(el, e, el)
 	})
 	return element
-=======
    element.addEventListener(eventType, e => {
      let el = e.target
      while (!el.matches(selector)) {
@@ -663,7 +688,6 @@ function delegate(element, eventType, selector, fn) {
      el && fn.call(el, e, el)
    })
    return element
->>>>>>> 536e5621c994931a85ceb18bdc861372ef08d02b
 }
 
 delegate(ul, 'click', 'li', f1)
@@ -1278,7 +1302,7 @@ module.exports = {
 
 #### Event Loop
 
-### **背景知识**
+##### **背景知识**
 
 (https://juejin.cn/post/6844903582538399752)
 
