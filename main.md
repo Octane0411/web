@@ -143,6 +143,14 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 
 border-box更好，符合直觉
 
+#### 画三角形
+
+```html
+<svg width="100" height="100">
+  <polygon points="50,0 100,100 0,100" style="fill: red;"/>
+</svg>
+```
+
 ## JS
 
 #### JS的数据类型有哪些
@@ -569,7 +577,7 @@ const deepClone = (a, cache) => {
     let result 
     if(a instanceof Function) {
       if(a.prototype) { // 有 prototype 就是普通函数
-        result = function(){ return a.apply(this, arguments) }
+        result = function(){ return a.apply(result, arguments) }
       } else {
         result = (...args) => { return a.call(undefined, ...args) }
       }
@@ -685,19 +693,6 @@ function delegate(element, eventType, selector, fn) {
 	  el && fn.call(el, e, el)
 	})
 	return element
-   element.addEventListener(eventType, e => {
-     let el = e.target
-     while (!el.matches(selector)) {
-       if (element === el) {
-         el = null
-         break
-       }
-       el = el.parentNode
-     }
-    // 没找到ul，什么都不做/找到了，执行fn
-     el && fn.call(el, e, el)
-   })
-   return element
 }
 
 delegate(ul, 'click', 'li', f1)
@@ -838,11 +833,16 @@ http://www.baidu.com:80/ssdasdsadad`
 1. JSONP（前端体系课有完整且详细的介绍）
 
 
-   1.  甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
+      1.  甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
 
-   1.  乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
 
-   1.  甲站点通过回调函数拿到乙站点的数据。
+
+      1.  乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
+
+
+
+      1.  甲站点通过回调函数拿到乙站点的数据。
+
 
    优点：改动少，缺点：只能发get/没有用户认证的功能
 
@@ -855,23 +855,19 @@ http://www.baidu.com:80/ssdasdsadad`
 
    ​	i.响应 OPTIONS 请求，在响应中添加如下的响应头
 
-      i.响应 OPTIONS 请求，在响应中添加如下的响应头
-
    
    ```js
    Access-Control-Allow-Origin: https://甲站点
    Access-Control-Allow-Methods: POST, GET, OPTIONS, PATCH
-Access-Control-Allow-Headers: Content-Type
+   Access-Control-Allow-Headers: Content-Type
    ```
+
    
-
    ​	ii.响应 POST 请求，在响应中添加 `Access-Control-Allow-Origin` 头。
-
-      ii.响应 POST 请求，在响应中添加 `Access-Control-Allow-Origin` 头。
 
    
    c. 如果需要附带身份信息，JS 中需要在 AJAX 里设置 `xhr.withCredentials = true` 。
-
+   
 1.  Nginx 代理 / Node.js 代理
 
         1.  前端 ⇒ 后端 ⇒ 另一个域名的后端
@@ -1020,6 +1016,8 @@ function handleValue(val: All) {
 2. 举例说明每个工具类型的用法。
 
 ## 工程化
+
+<img src="/Users/octane/Library/Application Support/typora-user-images/image-20220822152133138.png" alt="image-20220822152133138" style="zoom:200%;" />
 
 #### webpack打包过程
 
