@@ -99,7 +99,7 @@ http://dennisgo.cn/Articles/Layout/Centered.html
 
 https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 
-#### CSS选择器优先级如何确定
+#### CSS选择器优先级
 
 > 写博客总结，面试甩链接
 
@@ -112,6 +112,29 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 1. 相同优先级，出现在后面的，覆盖前面的
 
 1. 属性后面加 !important 的优先级最高，但是要少用
+
+**选择器**
+
+- id选择器(#myid)
+- 类选择器(.myclass)
+- 属性选择器(a[rel="external"])
+- 伪类选择器(a:hover, li:nth-child)
+- 标签选择器(div, h1,p)
+- 相邻选择器（h1 + p）
+- 子选择器(ul > li)
+- 后代选择器(li a)
+- 通配符选择器(*)
+
+**优先级：**
+
+- `!important`
+- 内联样式（1000）
+- ID选择器（0100）
+- 类选择器/属性选择器/伪类选择器（0010）
+- 元素选择器/伪元素选择器（0001）
+- 关系选择器/通配符选择器（0000）
+
+带!important 标记的样式属性优先级最高； 样式表的来源相同时： `!important > 行内样式>ID选择器 > 类选择器 > 标签 > 通配符 > 继承 > 浏览器默认属性`
 
 #### 如何清除浮动
 
