@@ -310,6 +310,16 @@ var x = function(){return '我是匿名函数'}()
 
 上面每一行代码都是一个立即执行函数。（举例法）
 
+```js
+for (var i = 0; i < 5; i++) {
+    (function (i){
+        setTimeout(() => {
+            console.log(i)
+        })
+    })(i)
+}
+```
+
 **解决了什么问题：**
 
 **在 ES6 之前**，只能通过它来「创建局部作用域」。
