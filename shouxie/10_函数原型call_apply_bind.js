@@ -22,7 +22,13 @@ Function.prototype.myApply = function (thisArg = window, args) {
 }
 
 Function.prototype.myBind = function (thisArg = window, ...args) {
-
+    const fn = this
+    return function newFn(...newArgs) {
+        if (this instanceof newFn) {
+            return new fn(...args, ...newArgs)
+        }
+        return fn.apply(thisArg, [...args, ...newArgs])
+    }
 }
 const echo = function (str) {
     console.log(this)

@@ -99,7 +99,7 @@ http://dennisgo.cn/Articles/Layout/Centered.html
 
 https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 
-#### CSS选择器优先级如何确定
+#### CSS选择器优先级
 
 > 写博客总结，面试甩链接
 
@@ -112,6 +112,29 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 1. 相同优先级，出现在后面的，覆盖前面的
 
 1. 属性后面加 !important 的优先级最高，但是要少用
+
+**选择器**
+
+- id选择器(#myid)
+- 类选择器(.myclass)
+- 属性选择器(a[rel="external"])
+- 伪类选择器(a:hover, li:nth-child)
+- 标签选择器(div, h1,p)
+- 相邻选择器（h1 + p）
+- 子选择器(ul > li)
+- 后代选择器(li a)
+- 通配符选择器(*)
+
+**优先级：**
+
+- `!important`
+- 内联样式（1000）
+- ID选择器（0100）
+- 类选择器/属性选择器/伪类选择器（0010）
+- 元素选择器/伪元素选择器（0001）
+- 关系选择器/通配符选择器（0000）
+
+带!important 标记的样式属性优先级最高； 样式表的来源相同时： `!important > 行内样式>ID选择器 > 类选择器 > 标签 > 通配符 > 继承 > 浏览器默认属性`
 
 #### 如何清除浮动
 
@@ -142,6 +165,14 @@ https://www.yuque.com/docs/share/708bd899-0c46-47ea-a94c-d7a189c0f7dc
 > 实际宽度=width
 
 border-box更好，符合直觉
+
+#### 画三角形
+
+```html
+<svg width="100" height="100">
+  <polygon points="50,0 100,100 0,100" style="fill: red;"/>
+</svg>
+```
 
 ## JS
 
@@ -579,7 +610,7 @@ const deepClone = (a, cache) => {
     let result 
     if(a instanceof Function) {
       if(a.prototype) { // 有 prototype 就是普通函数
-        result = function(){ return a.apply(this, arguments) }
+        result = function(){ return a.apply(result, arguments) }
       } else {
         result = (...args) => { return a.call(undefined, ...args) }
       }
@@ -695,19 +726,6 @@ function delegate(element, eventType, selector, fn) {
 	  el && fn.call(el, e, el)
 	})
 	return element
-   element.addEventListener(eventType, e => {
-     let el = e.target
-     while (!el.matches(selector)) {
-       if (element === el) {
-         el = null
-         break
-       }
-       el = el.parentNode
-     }
-    // 没找到ul，什么都不做/找到了，执行fn
-     el && fn.call(el, e, el)
-   })
-   return element
 }
 
 delegate(ul, 'click', 'li', f1)
@@ -792,6 +810,16 @@ HTTPS 的细节可以看网上的博客，比较复杂，难以记忆，建议�
 
 [HTTPS原理以及握手阶段](https://juejin.cn/post/6844903892765900814)
 
+1. 客户端向服务器发送支持的SSL/TSL的协议版本号，以及客户端支持的加密方法，和一个客户端生成的随机数
+
+2. 服务器确认协议版本和加密方法，向客户端发送一个由服务器生成的随机数，以及数字证书
+
+3. 客户端验证证书是否有效，有效则从证书中取出公钥，生成一个随机数，然后用公钥加密这个随机数，发给服务器
+
+4. 服务器用私钥解密，获取发来的随机数
+
+5. 客户端和服务器根据约定好的加密方法，使用前面生成的三个随机数，生成对话密钥，用来加密接下来的整个对话过程
+
 #### 三次握手四次挥手
 
 ##### 建立 TCP 连接时 server 与 client 会经历三次握手
@@ -848,11 +876,16 @@ http://www.baidu.com:80/ssdasdsadad`
 1. JSONP（前端体系课有完整且详细的介绍）
 
 
-   1.  甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
+      1.  甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
 
-   1.  乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
 
-   1.  甲站点通过回调函数拿到乙站点的数据。
+
+      1.  乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
+
+
+
+      1.  甲站点通过回调函数拿到乙站点的数据。
+
 
    优点：改动少，缺点：只能发get/没有用户认证的功能
 
@@ -865,23 +898,19 @@ http://www.baidu.com:80/ssdasdsadad`
 
    ​	i.响应 OPTIONS 请求，在响应中添加如下的响应头
 
-      i.响应 OPTIONS 请求，在响应中添加如下的响应头
-
    
    ```js
    Access-Control-Allow-Origin: https://甲站点
    Access-Control-Allow-Methods: POST, GET, OPTIONS, PATCH
-Access-Control-Allow-Headers: Content-Type
+   Access-Control-Allow-Headers: Content-Type
    ```
+
    
-
    ​	ii.响应 POST 请求，在响应中添加 `Access-Control-Allow-Origin` 头。
-
-      ii.响应 POST 请求，在响应中添加 `Access-Control-Allow-Origin` 头。
 
    
    c. 如果需要附带身份信息，JS 中需要在 AJAX 里设置 `xhr.withCredentials = true` 。
-
+   
 1.  Nginx 代理 / Node.js 代理
 
         1.  前端 ⇒ 后端 ⇒ 另一个域名的后端
@@ -966,6 +995,10 @@ Access-Control-Allow-Headers: Content-Type
 | 503  | Service Unavailable             | 由于超载或系统维护，服务器暂时的无法处理客户端的请求。延时的长度可包含在服务器的Retry-After头信息中 |
 | 504  | Gateway Time-out                | 充当网关或代理的服务器，未及时从远端服务器获取请求           |
 | 505  | HTTP Version not supported      | 服务器不支持请求的HTTP协议的版本，无法完成处理               |
+
+#### xss和csrf
+
+
 
 ## TS
 
@@ -1075,6 +1108,8 @@ function handleValue(val: All) {
 2. 举例说明每个工具类型的用法。
 
 ## 工程化
+
+<img src="/Users/octane/Library/Application Support/typora-user-images/image-20220822152133138.png" alt="image-20220822152133138" style="zoom:200%;" />
 
 #### webpack打包过程
 
@@ -1495,6 +1530,31 @@ Promise.resolve().then(() => {console.log(1);})
                  .then(() => {console.log(5);})
                  .then(() => {console.log(6);})
 ```
+
+#### 浏览器渲染
+
+1. 处理HTML 标记并构建DOM 树。
+2. 处理CSS 标记并构建CSSOM 树。
+3. 将DOM 与CSSOM 合并成一个**渲染**树。
+4. 根据**渲染**树来布局，计算每个节点的几何信息。
+5. 将各个节点绘制到屏幕上。
+
+#### 浏览器进程线程
+
+浏览器至少有四个进程：
+
+- 浏览器主进程
+- GPU进程
+- 网络进程
+- 渲染进程
+
+其中渲染进程又有五个线程：
+
+- 主线程（js引擎线程）
+- GUI渲染线程
+- 事件触发线程
+- 定时器触发线程
+- http请求线程
 
 ## React
 
