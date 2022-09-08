@@ -875,45 +875,66 @@ http://www.baidu.com:80/ssdasdsadad`
 
 1. JSONP（前端体系课有完整且详细的介绍）
 
+​	 1. 甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
 
-      1.  甲站点利用 script 标签可以跨域的特性，向乙站点发送 get 请求。
+​	 2. 乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
 
-
-
-      1.  乙站点**后端改造** JS 文件的内容，将数据传进回调函数。
-
-
-
-      1.  甲站点通过回调函数拿到乙站点的数据。
+ 	3. 甲站点通过回调函数拿到乙站点的数据。
 
 
    优点：改动少，缺点：只能发get/没有用户认证的功能
 
-2. CORS（前端体系课有完整且详细的介绍）
+2. CORS
+
+   > 简单请求和复杂请求
+   >
+   > 简单请求 请求方法是以下三种方法之一：
+   >
+   > - HEAD
+   > - GET
+   > - POST
+   >
+   > HTTP的头信息不超出以下几种字段:
+   >
+   > - Accept
+   > - Accept-Language
+   > - Content-Language
+   > - Content-Type
+   > - DPR
+   > - Downlink
+   > - Save-Data
+   > - Viewport-Width
+   > - Width
+   >
+   > Content-Type的值只有以下三种(Content-Type一般是指在post请求中，get请求中设置没有实际意义)
+   >
+   > - text/plain
+   > - multipart/form-data
+   > - application/x-www-form-urlencoded
 
    a. 对于简单请求，乙站点在响应头里添加 `Access-Control-Allow-Origin: http://甲站点` 即可。
-   
+
    b. 对于复杂请求，如 PATCH，乙站点需要：
-   
+
 
    ​	i.响应 OPTIONS 请求，在响应中添加如下的响应头
 
-   
+
    ```js
    Access-Control-Allow-Origin: https://甲站点
    Access-Control-Allow-Methods: POST, GET, OPTIONS, PATCH
    Access-Control-Allow-Headers: Content-Type
    ```
 
-   
+
    ​	ii.响应 POST 请求，在响应中添加 `Access-Control-Allow-Origin` 头。
 
-   
-   c. 如果需要附带身份信息，JS 中需要在 AJAX 里设置 `xhr.withCredentials = true` 。
-   
-1.  Nginx 代理 / Node.js 代理
 
-        1.  前端 ⇒ 后端 ⇒ 另一个域名的后端
+   c. 如果需要附带身份信息，JS 中需要在 AJAX 里设置 `xhr.withCredentials = true` 。
+
+3. Nginx 代理 / Node.js 代理
+
+       1.  前端 ⇒ 后端 ⇒ 另一个域名的后端
 
 详情参考 [MDN CORS 文档](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS)。
 
