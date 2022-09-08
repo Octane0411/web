@@ -1113,9 +1113,16 @@ function handleValue(val: All) {
 
 #### webpack打包过程
 
-1. 初始化
-2. 编译
-3. 
+- 开始运行 Webpack。
+  - 读取与合并参数，加载 plugin。
+  - 实例化 Compiler。
+    - 调用 compiler.run 创建 Compilation，代表一次资源的构建。
+    - Compilation 对象也提供了很多关键步骤的钩子函数，并生成一次 Chunk。
+    - Compilation.buildModule 主要执行 loader，编译掉不认识的代码。
+- 使用 Parser 分析项目依赖。
+  - 从 Chunk 开始解析依赖，使用 Module 和 Dependency 管理代码模块相互关系。
+- 使用 Template 生成结果代码。
+  - 基于 Chunk 的数据拼接字符串，生成最终代码。
 
 #### 常见 loader 和 plugin 有哪些？二者的区别是什么？
 
@@ -1536,8 +1543,9 @@ Promise.resolve().then(() => {console.log(1);})
 1. 处理HTML 标记并构建DOM 树。
 2. 处理CSS 标记并构建CSSOM 树。
 3. 将DOM 与CSSOM 合并成一个**渲染**树。
-4. 根据**渲染**树来布局，计算每个节点的几何信息。
-5. 将各个节点绘制到屏幕上。
+4. Layout(回流):根据生成的渲染树，进行回流(Layout)，得到节点的几何信息（位置，大小）
+5. Painting(重绘):根据渲染树以及回流得到的几何信息，得到节点的绝对像素
+6. Display:将像素发送给GPU，展示在页面上。
 
 #### 浏览器进程线程
 
@@ -1884,4 +1892,7 @@ function Frank(props){
 }
 ```
 
-完。
+## 优化
+
+
+
