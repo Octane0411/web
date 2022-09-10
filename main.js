@@ -1,11 +1,14 @@
-let a = {
-    first: 1,
-    second: {
-        third: 2
-    }
+function Person(age) {
+    this.age=age
 }
 
-let b = {...a}
-b.second.third = 3
-b.first = 4
-console.log(a)
+Person.prototype.name = 'name1'
+
+let person = new Person()
+console.log(person.__proto__)
+console.log(person.name)
+Person.prototype = {name:'name2'}
+
+console.log(person.__proto__)
+console.log(person.name)
+
